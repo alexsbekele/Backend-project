@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 class UserCreate(BaseModel):
@@ -16,6 +17,7 @@ class UserResponse(BaseModel):
 class TaskCreate(BaseModel):
     title: str
     completed: bool = False
+    description: str | None = None
 
 
 class TaskResponse(BaseModel):
@@ -23,12 +25,15 @@ class TaskResponse(BaseModel):
     title: str
     completed: bool
     user_id: int
+    description: str | None = None
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
 class TaskUpdate(BaseModel):
     title: str
     completed: bool
+    description: str | None = None
 
 class Token(BaseModel):
     access_token: str

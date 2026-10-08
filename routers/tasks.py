@@ -37,6 +37,7 @@ def create_task(
         title=task.title,
         completed=task.completed,
         user_id=current_user.id,
+        description=task.description,
     )
     db.add(new_task)
     db.commit()
@@ -59,10 +60,12 @@ def update_task(
     data: TaskUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
+    
 ):
     task = get_owned_task(db, task_id, current_user)
     task.title = data.title
     task.completed = data.completed
+    task.description = data.description
     db.commit()
     db.refresh(task)
     return task
