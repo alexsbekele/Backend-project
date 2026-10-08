@@ -38,3 +38,9 @@ class TaskUpdate(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class TaskPage(BaseModel):
+    items: list[TaskResponse]
+    total: int
+    limit: int
+    offset: int

@@ -5,8 +5,32 @@ from models import Task, User
 from schemas import TaskCreate, TaskUpdate
 
 
-def list_tasks(db: Session, user: User) -> list[Task]:
-    return db.query(Task).filter(Task.user_id == user.id).all()
+from typing import Literal
+
+SORT_COLUMNS = {"created_at": Task.created_at, "title": Task.title}
+
+
+def list_tasks(
+    db: Session,
+    user: User,
+    limit: int,
+    offset: int,
+    completed: bool | None,
+    sort_by: Literal["created_at", "title"],
+    order: Literal["asc", "desc"],
+) -> tuple[list[Task], int]:
+    query = db.query(Task).filter(Task.user_id == user.id)
+
+    if completed is not None:
+        query = query.filter(Task.completed == completed)
+
+    total = query.count()
+
+    column = SORT_COLUMNS[sort_by]
+    column = column.asc() if order == "asc" else column.desc()
+
+    items = query.order_by(column, Task.id).offset(offset).limit(limit).all()
+    return items, total
 
 
 def get_owned_task(db: Session, task_id: int, user: User) -> Task:
