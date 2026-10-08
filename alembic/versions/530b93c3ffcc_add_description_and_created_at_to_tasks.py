@@ -19,23 +19,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.create_table(
-        "users",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("name", sa.String(100), nullable=False),
-        sa.Column("email", sa.String(255), nullable=False, unique=True),
-        sa.Column("password_hash", sa.String(255), nullable=True),
-    )
-    op.create_table(
-        "tasks",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("title", sa.String(255), nullable=False),
-        sa.Column("completed", sa.Boolean(), server_default=sa.false()),
-        sa.Column("user_id", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(["user_id"], ["users.id"], name="fk_tasks_user"),
-    )
+    op.create_index("ix_tasks_user_id_created_at", "tasks", ["user_id", "created_at"])
 
 
 def downgrade() -> None:
-    op.drop_table("tasks")
-    op.drop_table("users")
+    op.drop_index("ix_tasks_user_id_created_at", table_name="tasks")

@@ -36,7 +36,8 @@ def test_create_and_list_tasks(client):
     assert res.json()["title"] == "Learn pytest"
 
     res = client.get("/tasks", headers=headers)
-    assert len(res.json()) == 1
+    assert res.json()["total"] == 1
+    assert len(res.json()["items"]) == 1
 
 
 def test_update_task(client):
@@ -76,3 +77,28 @@ def test_cannot_access_other_users_task(client):
     # Alice's task is untouched
     res = client.get(f"/tasks/{task_id}", headers=alice)
     assert res.json()["title"] == "Private"
+
+
+def test_pagination(client):
+    headers = make_user(client, "A", "a@example.com")
+    for i in range(5):
+        client.post("/tasks", json={"title": f"Task {i}"}, headers=headers)
+
+    res = client.get("/tasks?limit=2&offset=0", headers=headers).json()
+    assert res["total"] == 5
+    assert len(res["items"]) == 2
+
+    res = client.get("/tasks?limit=2&offset=4", headers=headers).json()
+    assert len(res["items"]) == 1  # last page is partial
+
+    assert client.get("/tasks?limit=1000", headers=headers).status_code == 422
+
+
+def test_filter_by_completed(client):
+    headers = make_user(client, "A", "a@example.com")
+    client.post("/tasks", json={"title": "Done", "completed": True}, headers=headers)
+    client.post("/tasks", json={"title": "Open", "completed": False}, headers=headers)
+
+    res = client.get("/tasks?completed=true", headers=headers).json()
+    assert res["total"] == 1
+    assert res["items"][0]["title"] == "Done"
