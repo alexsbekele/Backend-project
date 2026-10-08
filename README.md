@@ -1,3 +1,5 @@
+![CI](https://github.com/alexsbekele/Backend-project/actions/workflows/ci.yml/badge.svg)
+
 # Task API
 
 A REST API for managing personal tasks, built with FastAPI and PostgreSQL.
